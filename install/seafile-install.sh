@@ -15,7 +15,13 @@ update_os
 
 function random_alnum() {
   local length="${1:-20}"
-  tr -dc 'A-Za-z0-9' </dev/urandom | head -c "${length}"
+  local value=""
+
+  while [[ "${#value}" -lt "${length}" ]]; do
+    value="${value}$(tr -d '-' </proc/sys/kernel/random/uuid)"
+  done
+
+  printf '%s' "${value:0:${length}}"
 }
 
 function set_env_value() {
