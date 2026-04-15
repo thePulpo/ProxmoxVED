@@ -1,0 +1,48 @@
+{
+  "name": "SiYuan",
+  "slug": "siyuan",
+  "categories": [
+    12
+  ],
+  "date_created": "2026-04-16",
+  "type": "ct",
+  "updateable": true,
+  "privileged": false,
+  "interface_port": 6806,
+  "documentation": "https://siyuannote.com/article/1725202944",
+  "website": "https://b3log.org/siyuan/en/",
+  "logo": "https://cdn.jsdelivr.net/gh/selfhst/icons@main/webp/siyuan.webp",
+  "description": "SiYuan is a privacy-first personal knowledge management system with block-based editing, Markdown support, bidirectional links, flashcards, databases, and browser-based Docker hosting.",
+  "install_methods": [
+    {
+      "type": "default",
+      "script": "ct/siyuan.sh",
+      "config_path": "/opt/siyuan/.env",
+      "resources": {
+        "cpu": 2,
+        "ram": 2048,
+        "hdd": 8,
+        "os": "Debian",
+        "version": "13"
+      }
+    }
+  ],
+  "default_credentials": {
+    "username": null,
+    "password": null
+  },
+  "notes": [
+    {
+      "text": "The access authorization code is stored in `/opt/siyuan/.env` as `SIYUAN_AUTH_CODE`.",
+      "type": "info"
+    },
+    {
+      "text": "Docker-hosted SiYuan supports browser access only; desktop and mobile app connections are not supported in this mode.",
+      "type": "warning"
+    },
+    {
+      "text": "Export to PDF/HTML/Word and Markdown import are not supported in the Docker-hosted mode documented by SiYuan.",
+      "type": "warning"
+    }
+  ]
+}
