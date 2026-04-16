@@ -173,7 +173,7 @@ _bootstrap() {
   fi
 
   # Configurable base URL for development — override with COMMUNITY_SCRIPTS_URL
-  COMMUNITY_SCRIPTS_URL="${COMMUNITY_SCRIPTS_URL:-https://raw.githubusercontent.com/thePulpo/ProxmoxVED/feature/siyuan}"
+  COMMUNITY_SCRIPTS_URL="${COMMUNITY_SCRIPTS_URL:-https://raw.githubusercontent.com/thePulpo/ProxmoxVED/feature/logseq}"
 
   # Source core functions
   source <(curl -fsSL "$COMMUNITY_SCRIPTS_URL/misc/core.func")

@@ -1,0 +1,48 @@
+{
+  "name": "Logseq",
+  "slug": "logseq",
+  "categories": [
+    12
+  ],
+  "date_created": "2026-04-16",
+  "type": "ct",
+  "updateable": true,
+  "privileged": false,
+  "interface_port": 443,
+  "documentation": "https://github.com/logseq/logseq/blob/master/docs/docker-web-app-guide.md",
+  "website": "https://logseq.com/",
+  "logo": "https://logseq.com/favicon.ico",
+  "description": "Logseq is a privacy-first knowledge management app with bidirectional links, outlines, local-first graphs, and an official Docker-hosted webapp for browser-based access.",
+  "install_methods": [
+    {
+      "type": "default",
+      "script": "ct/logseq.sh",
+      "config_path": "/opt/logseq/.env",
+      "resources": {
+        "cpu": 1,
+        "ram": 1024,
+        "hdd": 4,
+        "os": "Debian",
+        "version": "13"
+      }
+    }
+  ],
+  "default_credentials": {
+    "username": null,
+    "password": null
+  },
+  "notes": [
+    {
+      "text": "Remote Logseq web access requires HTTPS and a browser that supports the File System Access API.",
+      "type": "warning"
+    },
+    {
+      "text": "Import the generated Caddy root certificate from `/opt/logseq/caddy-data/caddy/pki/authorities/local/root.crt` into your client trust store before using `https://<IP>`.",
+      "type": "info"
+    },
+    {
+      "text": "This script hosts the official Logseq web app only. It does not provide Logseq Sync or server-side graph storage.",
+      "type": "info"
+    }
+  ]
+}
