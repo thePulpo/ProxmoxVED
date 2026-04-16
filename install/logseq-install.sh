@@ -16,8 +16,12 @@ update_os
 USE_DOCKER_REPO=true
 setup_docker
 
+msg_info "Installing TLS utilities"
+$STD apt install -y openssl
+msg_ok "Installed TLS utilities"
+
 msg_info "Configuring Logseq"
-mkdir -p /opt/logseq /opt/logseq/caddy-data /opt/logseq/caddy-config
+mkdir -p /opt/logseq /opt/logseq/caddy-data /opt/logseq/caddy-config /opt/logseq/certs
 
 cat <<EOF >/opt/logseq/.env
 LOGSEQ_IMAGE=ghcr.io/logseq/logseq-webapp:latest
@@ -25,13 +29,42 @@ LOGSEQ_HOST=${LOCAL_IP}
 EOF
 chmod 600 /opt/logseq/.env
 
+msg_info "Generating self-signed TLS certificate"
+cat <<EOF >/opt/logseq/openssl.cnf
+[req]
+distinguished_name = req_distinguished_name
+x509_extensions = v3_req
+prompt = no
+
+[req_distinguished_name]
+CN = ${LOCAL_IP}
+
+[v3_req]
+subjectAltName = @alt_names
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+
+[alt_names]
+IP.1 = ${LOCAL_IP}
+IP.2 = 127.0.0.1
+DNS.1 = localhost
+EOF
+$STD openssl req -x509 -nodes -newkey rsa:2048 -days 3650 \
+  -keyout /opt/logseq/certs/logseq.key \
+  -out /opt/logseq/certs/logseq.crt \
+  -config /opt/logseq/openssl.cnf
+rm -f /opt/logseq/openssl.cnf
+chmod 600 /opt/logseq/certs/logseq.key
+chmod 644 /opt/logseq/certs/logseq.crt
+msg_ok "Generated self-signed TLS certificate"
+
 cat <<EOF >/opt/logseq/Caddyfile
 http://${LOCAL_IP} {
   redir https://${LOCAL_IP}{uri}
 }
 
 https://${LOCAL_IP} {
-  tls internal
+  tls /etc/caddy/certs/logseq.crt /etc/caddy/certs/logseq.key
   reverse_proxy logseq:80
 }
 EOF
@@ -54,6 +87,7 @@ services:
       - "443:443"
     volumes:
       - /opt/logseq/Caddyfile:/etc/caddy/Caddyfile:ro
+      - /opt/logseq/certs:/etc/caddy/certs:ro
       - /opt/logseq/caddy-data:/data
       - /opt/logseq/caddy-config:/config
 EOF

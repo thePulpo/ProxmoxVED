@@ -44,6 +44,51 @@ function update_script() {
   systemctl stop logseq-compose
   msg_ok "Stopped ${APP} stack"
 
+  msg_info "Refreshing demo TLS configuration"
+  $STD apt install -y openssl
+  LOCAL_IP="$(hostname -I | awk '{print $1}')"
+  mkdir -p /opt/logseq/certs
+  cat <<EOF >/opt/logseq/openssl.cnf
+[req]
+distinguished_name = req_distinguished_name
+x509_extensions = v3_req
+prompt = no
+
+[req_distinguished_name]
+CN = ${LOCAL_IP}
+
+[v3_req]
+subjectAltName = @alt_names
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+
+[alt_names]
+IP.1 = ${LOCAL_IP}
+IP.2 = 127.0.0.1
+DNS.1 = localhost
+EOF
+  $STD openssl req -x509 -nodes -newkey rsa:2048 -days 3650 \
+    -keyout /opt/logseq/certs/logseq.key \
+    -out /opt/logseq/certs/logseq.crt \
+    -config /opt/logseq/openssl.cnf
+  rm -f /opt/logseq/openssl.cnf
+  chmod 600 /opt/logseq/certs/logseq.key
+  chmod 644 /opt/logseq/certs/logseq.crt
+  cat <<EOF >/opt/logseq/Caddyfile
+http://${LOCAL_IP} {
+  redir https://${LOCAL_IP}{uri}
+}
+
+https://${LOCAL_IP} {
+  tls /etc/caddy/certs/logseq.crt /etc/caddy/certs/logseq.key
+  reverse_proxy logseq:80
+}
+EOF
+  if ! grep -q '/opt/logseq/certs:/etc/caddy/certs:ro' /opt/logseq/compose.yml; then
+    sed -i '/\/opt\/logseq\/Caddyfile:\/etc\/caddy\/Caddyfile:ro/a\      - /opt/logseq/certs:/etc/caddy/certs:ro' /opt/logseq/compose.yml
+  fi
+  msg_ok "Refreshed demo TLS configuration"
+
   msg_info "Pulling latest ${APP} images"
   cd /opt/logseq
   $STD docker compose pull
@@ -65,5 +110,5 @@ msg_ok "Completed successfully!\n"
 echo -e "${CREATING}${GN}${APP} setup has been successfully initialized!${CL}"
 echo -e "${INFO}${YW} Access it using the following URL:${CL}"
 echo -e "${TAB}${GATEWAY}${BGN}https://${IP}${CL}"
-echo -e "${INFO}${YW} Trust the generated Caddy root certificate before remote access:${CL}"
-echo -e "${TAB}${GATEWAY}${BGN}/opt/logseq/caddy-data/caddy/pki/authorities/local/root.crt${CL}"
+echo -e "${INFO}${YW} For demo use, accept the browser warning for the self-signed certificate.${CL}"
+echo -e "${TAB}${GATEWAY}${BGN}Advanced -> Continue to ${IP}${CL}"

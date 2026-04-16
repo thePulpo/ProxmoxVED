@@ -37,7 +37,7 @@
       "type": "warning"
     },
     {
-      "text": "Import the generated Caddy root certificate from `/opt/logseq/caddy-data/caddy/pki/authorities/local/root.crt` into your client trust store before using `https://<IP>`.",
+      "text": "This helper uses a self-signed certificate for `https://<IP>`. For demo use on a local network, continue through the browser warning page.",
       "type": "info"
     },
     {
